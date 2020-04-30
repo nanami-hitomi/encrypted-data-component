@@ -1,0 +1,74 @@
+import React from 'react'
+import { AES, enc } from 'crypto-js'
+
+
+class classname extends React.Component {//replace with other component name
+
+    state = {
+        decrypted: false,
+        decryptedData: '',
+        passwordGuess: ''
+    }
+
+    mySecretData = () => 'secretdata' //replace with actual secret data
+
+    decrypt = (possiblePassword) => {
+        var decrypted = AES.decrypt(this.mySecretData(), possiblePassword)
+        if (decrypted.sigBytes < 0) return false
+        return decrypted.toString(enc.Utf8)
+    }
+
+    decryptedToElement = (decrypted) => {
+        var typeLen = decrypted.search(';')
+        var type = decrypted.substring(0, typeLen)
+        var data = decrypted.substring(typeLen + 1)//1 after to not include the ;
+        switch (type) {
+            case 'text':
+                return <>{data}</>
+            case 'img':
+                return <img src={data} />
+            default:
+                return false
+        }
+    }
+
+    onTextboxChange = (event) => {
+        this.setState({ passwordGuess: event.target.value })
+    }
+
+    onButtonClick = () => {
+        //get possible encrypted message
+        var maybeDecrypted = this.decrypt(this.state.passwordGuess)
+        if (!maybeDecrypted) return
+
+        //if the message is something, try to turn it into an element
+        var maybeElement = this.decryptedToElement(maybeDecrypted)
+        if (!maybeElement) return
+
+        //if it's actually an element, set the state for that to be the thing displayed
+        this.setState({ decrypted: true, decryptedData: maybeElement })
+    }
+
+
+    render = () => {
+        //render secret element if decrypted
+        if (this.state.decrypted)
+            return this.state.decryptedData
+        else
+        //otherwise render decryption dialogue
+            return (
+                <>
+                    Decryption password here:
+                    <br />
+                    <input type="password" value={this.state.passwordGuess} onChange={this.onTextboxChange} />
+                    <br />
+                    <input type="submit" onClick={this.onButtonClick} value="Decrypt" />
+                </>)
+
+
+    }
+
+
+}
+
+export default classname
