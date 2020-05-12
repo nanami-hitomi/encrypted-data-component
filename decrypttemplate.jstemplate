@@ -14,7 +14,6 @@ class classname extends React.Component {//replace with other component name
 
     decrypt = (possiblePassword) => {
         var decrypted = AES.decrypt(this.mySecretData(), possiblePassword)
-        if (decrypted.sigBytes < 0) return false
         try {
             var decryptedString = decrypted.toString(enc.Utf8)
             if (decryptedString === '') return false
